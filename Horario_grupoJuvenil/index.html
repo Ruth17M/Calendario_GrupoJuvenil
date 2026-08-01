@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grupo Juvenil — Calendario de Actividades</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-bright: #f5d060;
+    --gold-dim: #8a6f30;
+    --cream: #faf6ee;
+    --ink: #1a1208;
+    --ink-soft: #241a0e;
+    --burgundy: #6b1e2e;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--ink);
+    font-family: 'Crimson Pro', Georgia, serif;
+    color: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,0.07) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 90%, rgba(107,30,46,0.12) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 1.5rem 1.2rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  header { text-align: center; padding: 2rem 0 1.2rem; }
+
+  .cross-ornament {
+    font-size: 1.6rem;
+    color: var(--gold);
+    letter-spacing: 1.2rem;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.7rem, 5vw, 3rem);
+    font-weight: 700;
+    color: var(--gold-light);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  header p.subtitle {
+    font-size: 1.05rem;
+    color: rgba(250,246,238,0.55);
+    font-style: italic;
+    margin-top: 0.4rem;
+  }
+
+  .header-line {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin: 1.4rem auto 0;
+  }
+
+  /* ── SWITCH CALENDARIO / LISTA ── */
+  .mode-switch {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin: 1.6rem 0 1.2rem;
+  }
+
+  .mode-btn {
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: rgba(250,246,238,0.6);
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    padding: 0.6rem 1.8rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-transform: uppercase;
+  }
+
+  .mode-btn + .mode-btn { border-left: none; }
+  .mode-btn:hover { border-color: var(--gold); color: var(--gold-light); background: rgba(201,168,76,0.06); }
+  .mode-btn.active { background: var(--gold); border-color: var(--gold); color: var(--ink); font-weight: 600; }
+
+  /* ── BARRA DE NAVEGACIÓN ── */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.9rem;
+  }
+
+  .nav-arrow {
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-light);
+    width: 2.4rem;
+    height: 2.4rem;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .nav-arrow:hover { background: rgba(201,168,76,0.12); border-color: var(--gold); }
+
+  .nav-label {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1rem, 3vw, 1.35rem);
+    color: var(--gold-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-width: 15rem;
+    text-align: center;
+  }
+
+  .selects { display: flex; gap: 0.5rem; align-items: center; }
+
+  select {
+    background: var(--ink-soft);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-light);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 0.95rem;
+    padding: 0.35rem 0.6rem;
+    cursor: pointer;
+  }
+  select:focus { outline: none; border-color: var(--gold); }
+
+  .sub-nav {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.6rem;
+  }
+
+  .chip {
+    background: transparent;
+    border: 1px solid rgba(201,168,76,0.3);
+    color: rgba(250,246,238,0.55);
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chip:hover { border-color: var(--gold); color: var(--gold-light); }
+  .chip.active { background: rgba(201,168,76,0.18); border-color: var(--gold); color: var(--gold-bright); }
+
+  /* ── REJILLA DEL MES ── */
+  .weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+
+  .weekday {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    padding: 0.4rem 0;
+  }
+
+  .month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .day-cell {
+    position: relative;
+    min-height: 82px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(201,168,76,0.12);
+    padding: 0.4rem 0.4rem 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    text-align: left;
+    color: inherit;
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 0.22rem;
+    overflow: hidden;
+  }
+
+  .day-cell:hover { background: rgba(201,168,76,0.08); border-color: var(--gold-dim); }
+  .day-cell.outside { opacity: 0.28; }
+  .day-cell.has-events { background: rgba(201,168,76,0.05); border-color: rgba(201,168,76,0.28); }
+  .day-cell.selected { border-color: var(--gold-bright); background: rgba(201,168,76,0.14); box-shadow: 0 0 0 1px var(--gold-bright) inset; }
+
+  .day-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(250,246,238,0.75);
+    line-height: 1;
+  }
+
+  .day-cell.today .day-num {
+    background: var(--gold);
+    color: var(--ink);
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+
+  .mini-event {
+    font-size: 0.68rem;
+    line-height: 1.15;
+    color: var(--cream);
+    border-left: 2px solid var(--gold);
+    padding-left: 0.28rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dots {
+    position: absolute;
+    bottom: 0.35rem;
+    left: 0.45rem;
+    display: flex;
+    gap: 3px;
+  }
+
+  .dot { width: 5px; height: 5px; border-radius: 50%; }
+
+  /* ── VISTA SEMANA ── */
+  .week-list { display: flex; flex-direction: column; gap: 4px; }
+
+  .week-row {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 0.9rem;
+    align-items: start;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(201,168,76,0.12);
+    padding: 0.75rem 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    text-align: left;
+    color: inherit;
+    font-family: inherit;
+    width: 100%;
+  }
+  .week-row:hover { background: rgba(201,168,76,0.07); border-color: var(--gold-dim); }
+  .week-row.has-events { border-color: rgba(201,168,76,0.28); }
+  .week-row.selected { border-color: var(--gold-bright); background: rgba(201,168,76,0.12); }
+
+  .week-date {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    line-height: 1.5;
+  }
+  .week-date strong {
+    display: block;
+    font-size: 1.35rem;
+    color: var(--gold-light);
+    letter-spacing: 0;
+  }
+  .week-row.today .week-date strong { color: var(--gold-bright); text-shadow: 0 0 12px rgba(245,208,96,0.4); }
+
+  .week-events { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .week-empty {
+    font-size: 0.9rem;
+    color: rgba(250,246,238,0.28);
+    font-style: italic;
+    padding-top: 0.3rem;
+  }
+
+  /* ── PANEL DE DETALLE ── */
+  .detail {
+    margin-top: 1.4rem;
+    border: 1px solid rgba(201,168,76,0.28);
+    background: rgba(201,168,76,0.04);
+    padding: 1.3rem 1.4rem;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .detail-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    padding-bottom: 0.7rem;
+    margin-bottom: 1rem;
+  }
+
+  .detail-date {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    color: var(--gold-light);
+    letter-spacing: 0.06em;
+  }
+
+  .detail-close {
+    background: transparent;
+    border: none;
+    color: rgba(250,246,238,0.4);
+    font-size: 1.3rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 0.2rem;
+  }
+  .detail-close:hover { color: var(--gold-light); }
+
+  .detail-empty {
+    font-size: 1rem;
+    color: rgba(250,246,238,0.35);
+    font-style: italic;
+  }
+
+  /* ── TARJETA DE EVENTO ── */
+  .event-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.7rem 0.9rem;
+    border-left: 3px solid var(--gold);
+    background: rgba(255,255,255,0.025);
+  }
+  .event-card + .event-card { margin-top: 0.6rem; }
+
+  .event-name { font-size: 1.05rem; font-weight: 600; color: var(--cream); line-height: 1.3; }
+  .event-resp { font-size: 0.9rem; color: var(--gold); font-style: italic; }
+  .event-note { font-size: 0.85rem; color: rgba(250,246,238,0.45); }
+
+  .event-type {
+    align-self: flex-start;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-family: 'Cinzel', serif;
+    padding: 0.16rem 0.55rem;
+    border-radius: 2px;
+    margin-top: 0.3rem;
+  }
+
+  /* ── VISTA LISTA ── */
+  .list-month { margin-bottom: 2.2rem; }
+
+  .list-month-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(201,168,76,0.25);
+    margin-bottom: 0.4rem;
+  }
+
+  .list-row {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 1rem;
+    align-items: start;
+    padding: 0.85rem 0.4rem;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+  }
+  .list-row:last-child { border-bottom: none; }
+  .list-row:hover { background: rgba(201,168,76,0.05); }
+  .list-row.is-past { opacity: 0.45; }
+
+  .list-date {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    line-height: 1.5;
+    text-align: right;
+  }
+  .list-date strong { display: block; font-size: 1.25rem; color: var(--gold-light); letter-spacing: 0; }
+  .list-row.is-next .list-date strong { color: var(--gold-bright); text-shadow: 0 0 12px rgba(245,208,96,0.4); }
+
+  .next-tag {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--gold);
+    color: var(--ink);
+    padding: 0.12rem 0.45rem;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
+  /* ── COLORES POR TIPO ── */
+  .t-tema        { background: rgba(60,100,160,0.2);  color: #9ab8e8; border: 1px solid rgba(60,100,160,0.45); }
+  .t-oracion     { background: rgba(107,30,46,0.35);  color: #e8a0ae; border: 1px solid rgba(107,30,46,0.7); }
+  .t-convivencia { background: rgba(201,168,76,0.16); color: var(--gold-light); border: 1px solid rgba(201,168,76,0.4); }
+  .t-salida      { background: rgba(80,120,60,0.22);  color: #a8d08a; border: 1px solid rgba(80,120,60,0.5); }
+  .t-especial    { background: rgba(140,60,160,0.2);  color: #d0a0e8; border: 1px solid rgba(140,60,160,0.5); }
+  .t-servicio    { background: rgba(40,130,140,0.2);  color: #8fd4dc; border: 1px solid rgba(40,130,140,0.5); }
+  .t-descanso    { background: rgba(255,255,255,0.05);color: rgba(250,246,238,0.45); border: 1px solid rgba(255,255,255,0.12); }
+
+  .b-tema        { background: #6f9ada; }
+  .b-oracion     { background: #c2596e; }
+  .b-convivencia { background: var(--gold); }
+  .b-salida      { background: #85b862; }
+  .b-especial    { background: #b076cc; }
+  .b-servicio    { background: #4fb3bf; }
+  .b-descanso    { background: rgba(250,246,238,0.3); }
+
+  .l-tema        { border-left-color: #6f9ada; }
+  .l-oracion     { border-left-color: #c2596e; }
+  .l-convivencia { border-left-color: var(--gold); }
+  .l-salida      { border-left-color: #85b862; }
+  .l-especial    { border-left-color: #b076cc; }
+  .l-servicio    { border-left-color: #4fb3bf; }
+  .l-descanso    { border-left-color: rgba(250,246,238,0.3); }
+
+  /* ── LEYENDA ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.1rem;
+    justify-content: center;
+    margin-top: 1.8rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid rgba(201,168,76,0.15);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: rgba(250,246,238,0.5);
+    letter-spacing: 0.04em;
+  }
+
+  .legend-swatch { width: 9px; height: 9px; border-radius: 50%; }
+
+  .view { display: none; }
+  .view.active { display: block; animation: fadeUp 0.35s ease both; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  footer {
+    text-align: center;
+    padding-top: 3rem;
+    color: rgba(250,246,238,0.2);
+    font-size: 0.8rem;
+    font-style: italic;
+    letter-spacing: 0.06em;
+  }
+
+  footer::before {
+    content: '✦';
+    display: block;
+    font-size: 1rem;
+    color: var(--gold-dim);
+    margin-bottom: 0.6rem;
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 1rem 0.7rem 3rem; }
+    .day-cell { min-height: 58px; padding: 0.3rem 0.25rem 0.9rem; }
+    .mini-event { display: none; }
+    .weekday { font-size: 0.6rem; letter-spacing: 0.06em; }
+    .day-num { font-size: 0.78rem; }
+    .nav-label { min-width: 100%; order: -1; margin-bottom: 0.3rem; }
+    .week-row { grid-template-columns: 68px 1fr; gap: 0.6rem; }
+    .list-row { grid-template-columns: 68px 1fr; gap: 0.7rem; }
+    .month-grid, .weekdays { gap: 3px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <span class="cross-ornament">✦  ✝  ✦</span>
+    <h1>Grupo Juvenil</h1>
+    <p class="subtitle">Calendario de Actividades</p>
+    <div class="header-line"></div>
+  </header>
+
+  <div class="mode-switch">
+    <button class="mode-btn active" data-mode="calendar">Calendario</button>
+    <button class="mode-btn" data-mode="list">Lista</button>
+  </div>
+
+  <!-- ══ VISTA CALENDARIO ══ -->
+  <div class="view active" id="view-calendar">
+    <div class="nav-bar">
+      <button class="nav-arrow" id="prev" aria-label="Anterior">‹</button>
+      <div class="nav-label" id="navLabel"></div>
+      <button class="nav-arrow" id="next" aria-label="Siguiente">›</button>
+      <div class="selects">
+        <select id="monthSel"></select>
+        <select id="yearSel"></select>
+      </div>
+    </div>
+
+    <div class="sub-nav">
+      <button class="chip active" data-view="month">Mes</button>
+      <button class="chip" data-view="week">Semana</button>
+      <button class="chip" id="todayBtn">Hoy</button>
+    </div>
+
+    <div id="monthWrap">
+      <div class="weekdays" id="weekdays"></div>
+      <div class="month-grid" id="grid"></div>
+    </div>
+
+    <div id="weekWrap" style="display:none">
+      <div class="week-list" id="weekList"></div>
+    </div>
+
+    <div id="detail"></div>
+
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <!-- ══ VISTA LISTA ══ -->
+  <div class="view" id="view-list">
+    <div id="listWrap"></div>
+    <div class="legend" id="legend2"></div>
+  </div>
+
+  <footer>
+    Grupo Juvenil · Julio 2026 — Enero 2027
+  </footer>
+
+</div>
+
+<script>
+/* ═══════════ DATOS ═══════════ */
+var EVENTS = [
+  { date: '2026-07-30', name: 'Tema',                      resp: 'Baruc',         type: 'tema' },
+  { date: '2026-08-06', name: 'Ida a los Bravos',           resp: '',              type: 'salida',      note: '9:00 ' },
+  { date: '2026-08-13', name: 'Hora Santa',                resp: '',              type: 'oracion' },
+  { date: '2026-08-20', name: 'Tema',                      resp: 'Juanito',       type: 'tema' },
+  { date: '2026-08-22', name: 'Misión Joven',               resp: 'Todos',         type: 'convivencia', note: 'San juan de Dios y de ahí nos movemos a la parroquia del perpetuo socorro'},
+  { date: '2026-08-27', name: 'Tema',                      resp: 'Lucía',         type: 'tema' },
+  { date: '2026-09-03', name: 'Convivencia',               resp: '',              type: 'convivencia' },
+  { date: '2026-09-06', name: 'Venta de pasteles',         resp: '',              type: 'servicio' },
+  { date: '2026-09-07', name: 'Venta de pasteles',         resp: '',              type: 'servicio' },
+  { date: '2026-09-08', name: 'Venta de pasteles',         resp: '',              type: 'servicio' },
+  { date: '2026-09-09', name: 'Venta de pasteles',         resp: '',              type: 'servicio' },
+  { date: '2026-09-10', name: 'Venta de pasteles',         resp: '',              type: 'servicio' },
+  { date: '2026-09-10', name: 'Hora Santa',                resp: '',              type: 'oracion' },
+  { date: '2026-09-11', name: 'Venta de pasteles',         resp: '',              type: 'servicio' },
+  { date: '2026-09-12', name: 'Venta de pasteles',         resp: '',              type: 'servicio' },
+  { date: '2026-09-13', name: 'Venta de pasteles',         resp: '',              type: 'servicio' },
+  { date: '2026-09-17', name: 'Tema',                      resp: 'Oscar',         type: 'tema' },
+  { date: '2026-09-24', name: 'Tema',                      resp: 'Ruth',          type: 'tema' },
+  { date: '2026-10-01', name: 'Preparación de la Marcha',  resp: '',              type: 'especial' },
+  { date: '2026-10-02', name: 'Marcha Cristo Rey',         resp: '',              type: 'especial' },
+  { date: '2026-10-03', name: 'Marcha Cristo Rey',         resp: '',              type: 'especial' },
+  { date: '2026-10-08', name: 'Hora Santa',                resp: '',              type: 'oracion' },
+  { date: '2026-10-15', name: 'Tema',                      resp: 'Tere',          type: 'tema' },
+  { date: '2026-10-22', name: 'Convivencia',               resp: '',              type: 'convivencia' },
+  { date: '2026-10-29', name: 'Tema',                      resp: 'Mateo',         type: 'tema' },
+  { date: '2026-11-05', name: 'Tema',                      resp: 'Dulce e Isaac', type: 'tema' },
+  { date: '2026-11-12', name: 'Hora Santa',                resp: '',              type: 'oracion' },
+  { date: '2026-11-19', name: 'Salida a los Bolos',                     resp: '',              type: 'salida' },
+  { date: '2026-11-26', name: 'Salida a Cáritas',          resp: '',              type: 'salida', note: 'Collab con el grupo de Cáritas 5:30pm' },
+  { date: '2026-12-03', name: 'Tema',                      resp: 'Baruc',         type: 'tema' },
+  { date: '2026-12-10', name: 'Hora Santa',                resp: '',              type: 'oracion' },
+  { date: '2026-12-17', name: 'Convivio',                  resp: '',              type: 'convivencia' },
+  { date: '2026-12-24', name: 'Sin reunión',               resp: '',              type: 'descanso' },
+  { date: '2026-12-31', name: 'Sin reunión',               resp: '',              type: 'descanso' },
+  { date: '2027-01-01', name: 'Fiesta Parroquial',         resp: '',              type: 'especial' }
+];
+
+var TYPES = {
+  tema:        'Tema',
+  oracion:     'Oración',
+  convivencia: 'Convivencia',
+  salida:      'Salida',
+  especial:    'Especial',
+  servicio:    'Servicio',
+  descanso:    'Sin reunión'
+};
+
+var MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var DAYS_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+var DAYS_LONG  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+/* ═══════════ UTILIDADES ═══════════ */
+function parseKey(key) {
+  var p = key.split('-');
+  return new Date(+p[0], +p[1] - 1, +p[2]);
+}
+
+function keyOf(d) {
+  var m = d.getMonth() + 1, day = d.getDate();
+  return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day;
+}
+
+function startOfWeek(d) {
+  var s = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  s.setDate(s.getDate() - s.getDay());
+  return s;
+}
+
+function eventsOn(key) {
+  return EVENTS.filter(function(e) { return e.date === key; });
+}
+
+function longDate(d) {
+  return DAYS_LONG[d.getDay()] + ' ' + d.getDate() + ' de ' + MONTHS[d.getMonth()] + ' de ' + d.getFullYear();
+}
+
+var TODAY_KEY = keyOf(new Date());
+
+/* Primera actividad de hoy en adelante — se marca como "próximo" */
+var NEXT_KEY = (function() {
+  var future = EVENTS.filter(function(e) { return e.date >= TODAY_KEY && e.type !== 'descanso'; });
+  return future.length ? future[0].date : null;
+})();
+
+/* ═══════════ ESTADO ═══════════ */
+var state = {
+  mode: 'calendar',
+  calView: 'month',
+  cursor: (function() {
+    var now = new Date();
+    var first = parseKey(EVENTS[0].date);
+    var last  = parseKey(EVENTS[EVENTS.length - 1].date);
+    if (now < first) return first;
+    if (now > last)  return last;
+    return now;
+  })(),
+  selected: null
+};
+
+/* ═══════════ RENDER: TARJETA DE ACTIVIDAD ═══════════ */
+function eventCard(e) {
+  var html = '<div class="event-card l-' + e.type + '">';
+  html += '<div class="event-name">' + e.name + '</div>';
+  if (e.resp) html += '<div class="event-resp">' + e.resp + '</div>';
+  if (e.note) html += '<div class="event-note">' + e.note + '</div>';
+  html += '<span class="event-type t-' + e.type + '">' + TYPES[e.type] + '</span>';
+  html += '</div>';
+  return html;
+}
+
+/* ═══════════ RENDER: REJILLA DEL MES ═══════════ */
+function renderMonth() {
+  var wd = document.getElementById('weekdays');
+  if (!wd.childNodes.length) {
+    wd.innerHTML = DAYS_SHORT.map(function(d) { return '<div class="weekday">' + d + '</div>'; }).join('');
+  }
+
+  var year = state.cursor.getFullYear();
+  var month = state.cursor.getMonth();
+  var start = startOfWeek(new Date(year, month, 1));
+
+  var cells = '';
+  for (var i = 0; i < 42; i++) {
+    var d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    var key = keyOf(d);
+    var evs = eventsOn(key);
+    var cls = 'day-cell';
+    if (d.getMonth() !== month) cls += ' outside';
+    if (evs.length) cls += ' has-events';
+    if (key === TODAY_KEY) cls += ' today';
+    if (key === state.selected) cls += ' selected';
+
+    cells += '<button class="' + cls + '" data-key="' + key + '">';
+    cells += '<span class="day-num">' + d.getDate() + '</span>';
+    evs.slice(0, 2).forEach(function(e) {
+      cells += '<span class="mini-event">' + (e.resp ? e.name + ' · ' + e.resp : e.name) + '</span>';
+    });
+    if (evs.length) {
+      cells += '<span class="dots">';
+      evs.forEach(function(e) { cells += '<span class="dot b-' + e.type + '"></span>'; });
+      cells += '</span>';
+    }
+    cells += '</button>';
+  }
+
+  document.getElementById('grid').innerHTML = cells;
+  document.getElementById('navLabel').textContent = MONTHS[month] + ' ' + year;
+}
+
+/* ═══════════ RENDER: SEMANA ═══════════ */
+function renderWeek() {
+  var start = startOfWeek(state.cursor);
+  var rows = '';
+
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    var key = keyOf(d);
+    var evs = eventsOn(key);
+    var cls = 'week-row';
+    if (evs.length) cls += ' has-events';
+    if (key === TODAY_KEY) cls += ' today';
+    if (key === state.selected) cls += ' selected';
+
+    rows += '<button class="' + cls + '" data-key="' + key + '">';
+    rows += '<div class="week-date">' + DAYS_SHORT[d.getDay()] + '<strong>' + d.getDate() + '</strong>' + MONTHS[d.getMonth()].slice(0, 3) + '</div>';
+    rows += '<div class="week-events">';
+    if (evs.length) {
+      evs.forEach(function(e) { rows += eventCard(e); });
+    } else {
+      rows += '<div class="week-empty">Sin actividades</div>';
+    }
+    rows += '</div></button>';
+  }
+
+  document.getElementById('weekList').innerHTML = rows;
+
+  var end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+  var label = start.getDate() + ' ' + MONTHS[start.getMonth()].slice(0, 3);
+  label += ' — ' + end.getDate() + ' ' + MONTHS[end.getMonth()].slice(0, 3) + ' ' + end.getFullYear();
+  document.getElementById('navLabel').textContent = label;
+}
+
+/* ═══════════ RENDER: DETALLE DEL DÍA ═══════════ */
+function renderDetail() {
+  var box = document.getElementById('detail');
+  if (!state.selected) { box.innerHTML = ''; return; }
+
+  var d = parseKey(state.selected);
+  var evs = eventsOn(state.selected);
+
+  var html = '<div class="detail">';
+  html += '<div class="detail-head">';
+  html += '<div class="detail-date">' + longDate(d) + '</div>';
+  html += '<button class="detail-close" id="detailClose" aria-label="Cerrar">×</button>';
+  html += '</div>';
+  if (evs.length) {
+    evs.forEach(function(e) { html += eventCard(e); });
+  } else {
+    html += '<div class="detail-empty">Sin actividades programadas para este día.</div>';
+  }
+  html += '</div>';
+
+  box.innerHTML = html;
+  document.getElementById('detailClose').addEventListener('click', function() {
+    state.selected = null;
+    render();
+  });
+}
+
+/* ═══════════ RENDER: LISTA COMPLETA ═══════════ */
+function renderList() {
+  var groups = [];
+  var index = {};
+
+  EVENTS.forEach(function(e) {
+    var g = e.date.slice(0, 7);
+    if (!index[g]) { index[g] = { key: g, items: [] }; groups.push(index[g]); }
+    index[g].items.push(e);
+  });
+
+  var html = '';
+  groups.forEach(function(g) {
+    var p = g.key.split('-');
+    html += '<div class="list-month">';
+    html += '<div class="list-month-title">' + MONTHS[+p[1] - 1] + ' ' + p[0] + '</div>';
+
+    g.items.forEach(function(e) {
+      var d = parseKey(e.date);
+      var cls = 'list-row';
+      if (e.date < TODAY_KEY) cls += ' is-past';
+      if (e.date === NEXT_KEY) cls += ' is-next';
+
+      html += '<div class="' + cls + '">';
+      html += '<div class="list-date">' + DAYS_SHORT[d.getDay()] + '<strong>' + d.getDate() + '</strong>' + MONTHS[d.getMonth()].slice(0, 3) + '</div>';
+      html += '<div>';
+      html += '<div class="event-name">' + e.name;
+      if (e.date === NEXT_KEY) html += '<span class="next-tag">Próximo</span>';
+      html += '</div>';
+      if (e.resp) html += '<div class="event-resp">' + e.resp + '</div>';
+      if (e.note) html += '<div class="event-note">' + e.note + '</div>';
+      html += '<span class="event-type t-' + e.type + '">' + TYPES[e.type] + '</span>';
+      html += '</div></div>';
+    });
+
+    html += '</div>';
+  });
+
+  document.getElementById('listWrap').innerHTML = html;
+}
+
+/* ═══════════ RENDER: LEYENDA ═══════════ */
+function renderLegend() {
+  var html = Object.keys(TYPES).map(function(t) {
+    return '<div class="legend-item"><span class="legend-swatch b-' + t + '"></span>' + TYPES[t] + '</div>';
+  }).join('');
+  document.getElementById('legend').innerHTML = html;
+  document.getElementById('legend2').innerHTML = html;
+}
+
+/* ═══════════ RENDER PRINCIPAL ═══════════ */
+function render() {
+  document.getElementById('monthWrap').style.display = state.calView === 'month' ? '' : 'none';
+  document.getElementById('weekWrap').style.display  = state.calView === 'week'  ? '' : 'none';
+
+  if (state.calView === 'month') renderMonth(); else renderWeek();
+  renderDetail();
+  syncSelects();
+}
+
+function syncSelects() {
+  document.getElementById('monthSel').value = state.cursor.getMonth();
+  document.getElementById('yearSel').value  = state.cursor.getFullYear();
+}
+
+/* ═══════════ SELECTORES DE MES Y AÑO ═══════════ */
+(function buildSelects() {
+  var ms = document.getElementById('monthSel');
+  ms.innerHTML = MONTHS.map(function(m, i) { return '<option value="' + i + '">' + m + '</option>'; }).join('');
+
+  var years = [];
+  EVENTS.forEach(function(e) {
+    var y = +e.date.slice(0, 4);
+    if (years.indexOf(y) === -1) years.push(y);
+  });
+  var thisYear = new Date().getFullYear();
+  if (years.indexOf(thisYear) === -1) years.push(thisYear);
+  years.sort();
+
+  var opts = '';
+  for (var y = years[0] - 1; y <= years[years.length - 1] + 1; y++) {
+    opts += '<option value="' + y + '">' + y + '</option>';
+  }
+  document.getElementById('yearSel').innerHTML = opts;
+
+  ms.addEventListener('change', function() {
+    state.cursor = new Date(state.cursor.getFullYear(), +this.value, 1);
+    render();
+  });
+  document.getElementById('yearSel').addEventListener('change', function() {
+    state.cursor = new Date(+this.value, state.cursor.getMonth(), 1);
+    render();
+  });
+})();
+
+/* ═══════════ INTERACCIÓN ═══════════ */
+document.getElementById('prev').addEventListener('click', function() {
+  if (state.calView === 'month') {
+    state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth() - 1, 1);
+  } else {
+    state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth(), state.cursor.getDate() - 7);
+  }
+  render();
+});
+
+document.getElementById('next').addEventListener('click', function() {
+  if (state.calView === 'month') {
+    state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth() + 1, 1);
+  } else {
+    state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth(), state.cursor.getDate() + 7);
+  }
+  render();
+});
+
+document.getElementById('todayBtn').addEventListener('click', function() {
+  state.cursor = new Date();
+  state.selected = TODAY_KEY;
+  render();
+});
+
+document.querySelectorAll('.chip[data-view]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.chip[data-view]').forEach(function(b) { b.classList.remove('active'); });
+    this.classList.add('active');
+    state.calView = this.getAttribute('data-view');
+    /* Si hay un día abierto, la vista nueva se centra en él */
+    if (state.selected) state.cursor = parseKey(state.selected);
+    render();
+  });
+});
+
+document.querySelectorAll('.mode-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
+    this.classList.add('active');
+    state.mode = this.getAttribute('data-mode');
+    document.getElementById('view-calendar').classList.toggle('active', state.mode === 'calendar');
+    document.getElementById('view-list').classList.toggle('active', state.mode === 'list');
+  });
+});
+
+/* Click en un día — delegado, porque la rejilla se vuelve a dibujar */
+document.addEventListener('click', function(ev) {
+  var cell = ev.target.closest('.day-cell, .week-row');
+  if (!cell) return;
+  var key = cell.getAttribute('data-key');
+  state.selected = (state.selected === key) ? null : key;
+  if (state.calView === 'month') {
+    var d = parseKey(key);
+    if (d.getMonth() !== state.cursor.getMonth()) state.cursor = new Date(d.getFullYear(), d.getMonth(), 1);
+  }
+  render();
+  if (state.selected) {
+    var box = document.querySelector('#detail .detail');
+    if (box) box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+});
+
+/* ═══════════ INICIO ═══════════ */
+renderLegend();
+renderList();
+render();
+</script>
+</body>
+</html>
